@@ -1,0 +1,14 @@
+{
+    "maxUrlNum": 10,
+    "preparedUrlFiles":[
+        "1",
+        "2",
+        "3"
+    ],
+    "imgSave": [
+       "A","B","C"
+    ],
+    "URLHistory":[
+    	"x","y","z"
+    ]
+}

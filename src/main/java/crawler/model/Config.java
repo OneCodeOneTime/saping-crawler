@@ -1,0 +1,9 @@
+package crawler.model;
+/**
+ * ≈‰÷√œÓ
+ * @author baitp
+ *
+ */
+public class Config {
+	
+}
