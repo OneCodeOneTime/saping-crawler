@@ -1,0 +1,14 @@
+{
+    "preparedUrls":[
+        "http://www.sina.com.cn/",
+        "http://news.163.com/",
+        "http://www.qq.com/"
+    ],
+    "imgSave": [
+       "E:/爬虫文件/crawler/imgSave/图像1",
+       "E:/爬虫文件/crawler/imgSave/图像2",
+       "E:/爬虫文件/crawler/imgSave/图像3"
+    ],
+    "downloadedWebpagePath":"E:/爬虫文件/crawler/webpages",
+    "grabbedUrlSaveDir":"E:/爬虫文件/crawler/grabbedUrl"
+}

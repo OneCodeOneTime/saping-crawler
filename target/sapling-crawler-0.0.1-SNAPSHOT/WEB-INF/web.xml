@@ -1,0 +1,7 @@
+<web-app>
+  <servlet>
+    <servlet-name>config</servlet-name>
+    <servlet-class>crawler.config.ConfigInitializing</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+</web-app>
