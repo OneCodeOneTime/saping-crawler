@@ -16,6 +16,7 @@ import utils.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -204,7 +205,26 @@ class CrawOneUrl implements Runnable{
                if("title".equals(e.tagName())){
                    title = e.text();
                    haveTitle = true;
-                   break;
+               }
+               String href = e.attr("href");
+               if(!Config.NO_GRAB_HREFS.contains(href)){
+                    synchronized (StrategyTest.waitingGrabQueue){
+                        //满则等待
+                        while(StrategyTest.waitingGrabQueue.remainingCapacity() == 0){
+                            StrategyTest.waitingGrabQueue.notifyAll();
+                            try {
+                                StrategyTest.waitingGrabQueue.wait();
+                            }catch(InterruptedException ine){
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                        try {
+                            StrategyTest.waitingGrabQueue.add(new URL(href));
+                        }catch(MalformedURLException mf){
+
+                        }
+                        StrategyTest.waitingGrabQueue.notifyAll();
+                    }
                }
             }
             if(!haveTitle){
@@ -246,29 +266,36 @@ class SaveGrabbedUrlToFile implements Runnable{
     public void run() {
         //使用多个线程来存已抓取url
         synchronized (Config.grabbedUrlSave){
-            if(null != urls && urls.size() > 0){
-                File file = Config.grabbedUrlSave;
-                if(file.exists()){
-                    StringBuffer sb = new StringBuffer("");
-                    Iterator<String> it = urls.iterator();
-                    while(it.hasNext()){
-                        sb.append(it.next()+"  ");
-                    }
-                    try(FileChannel fc = new RandomAccessFile(Config.grabbedUrlSave,"rw").getChannel()){
-                        //从文件尾部开始写
-                        fc.position(fc.size());
-                        ByteBuffer bb = ByteBuffer.allocate(sb.toString().getBytes().length);
-                        bb.clear();
-                        bb.put(sb.toString().getBytes());
-                        //position移到开头
-                        bb.flip();
-                        fc.write(bb);
-                    }catch(IOException e){
+            try {
+                if (null != urls && urls.size() > 0) {
+                    File file = Config.grabbedUrlSave;
+                    //按天生成文件：yyyy-MM-dd.txt的格式
+                    file = FileUtils.isNotExistCreate(file.getAbsolutePath(),
+                            new SimpleDateFormat(Config.GRABBED_URL_FILE_FORMAT).format(new Date())+".txt").toFile();
+                    if (file.exists()) {
+                        StringBuffer sb = new StringBuffer("");
+                        Iterator<String> it = urls.iterator();
+                        while (it.hasNext()) {
+                            sb.append(it.next() + "  ");
+                        }
+                        try (FileChannel fc = new RandomAccessFile(file, "rw").getChannel()) {
+                            //从文件尾部开始写
+                            fc.position(fc.size());
+                            ByteBuffer bb = ByteBuffer.allocate(sb.toString().getBytes().length);
+                            bb.clear();
+                            bb.put(sb.toString().getBytes());
+                            //position移到开头
+                            bb.flip();
+                            fc.write(bb);
+                        } catch (IOException e) {
 
+                        }
+                    } else {
+                        System.err.println("存放已抓取url记录的路径：" + Config.grabbedUrlSave + "不存在");
                     }
-                }else{
-                    System.err.println("存放已抓取url记录的路径："+Config.grabbedUrlSave+"不存在");
                 }
+            }catch(Exception e){
+
             }
         }
         //使用单线程来存已抓取url

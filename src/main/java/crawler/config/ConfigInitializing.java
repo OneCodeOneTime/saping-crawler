@@ -92,7 +92,7 @@ public class ConfigInitializing extends FrameworkServlet{
 		if(null != grabbedUrlDir && grabbedUrlDir instanceof String){
 			try{
 				String grabbedUrlDirString = new String(grabbedUrlDir.toString().getBytes(),"UTF-8");
-				Path path = FileUtils.isNotExistCreate(grabbedUrlDirString,Config.grabbedUrlFileName);
+				Path path = FileUtils.isNotExistCreate(grabbedUrlDirString,"");
 				if(null != path) {
 					Config.grabbedUrlSave = path.toFile();
 				}
